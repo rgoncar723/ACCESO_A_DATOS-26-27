@@ -1,0 +1,14 @@
+Stream<Path> filesContents;
+Stream<Path> filesContents;
+Stream<Path> directoryContents;
+Stream<Path> contents;
+Stream<Path> directoryContents;
+Path decTry;
+BufferedWriter bw;
+Stream<Path> content;
+BufferedReader br;
+BufferedReader br;
+BufferedReader br;
+BufferedWriter bw;
+BufferedReader br;
+BufferedReader br;

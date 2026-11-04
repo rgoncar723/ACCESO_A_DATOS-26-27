@@ -1,0 +1,637 @@
+Archivo: Ejercicio3.java
+package ejercicios1_1Directorios;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
+import java.util.stream.Stream;
+
+public class Ejercicio3 {
+    /*
+    Muestra el nombre y tipo (fichero o directorio) de los ficheros y
+    subdirectorios contenidos en un directorio solicitado al usuario.
+    Muestra también el contenido de todos los subdirectorios y si éstos contienen subdirectorios también...
+    y así sucesivamente hasta mostrar todo el contenido de dicho directorio.
+    No se puede utilizar el método walk de la clase Files.
+    */
+    public void show() {
+        Scanner kb = new Scanner(System.in);
+        Path pathToComprobe;
+        System.out.println("Introduzca el path a combrobar");
+        pathToComprobe = Paths.get(kb.nextLine());
+        showFiles(pathToComprobe);
+        showDirectories(pathToComprobe);
+    }
+
+    public void showFiles(Path userPath) {
+        try (Stream<Path> filesContents = Files.list(userPath)) {
+            Stream<Path> files = filesContents.filter(Files::isRegularFile);
+            Iterable<Path> iterable = files::iterator;
+            for (Path p : iterable) {
+                System.out.printf("Archivo : %s\n", p);
+            }
+        } catch (IOException e) {
+            System.err.printf("Error de Entrada/Salida", e.getMessage());
+        }
+    }
+
+    public void showDirectories(Path userPath) {
+        try (Stream<Path> filesContents = Files.list(userPath)) {
+            Stream<Path> files = filesContents.filter(Files::isDirectory);
+            Iterable<Path> iterable = files::iterator;
+            for (Path p : iterable) {
+                System.out.printf("Directorio : %s\n", p);
+            }
+        } catch (IOException e) {
+            System.err.printf("Error de Entrada/Salida", e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+
+        new Ejercicio3().show();
+    }
+}
+
+Archivo: Ejercicio2.java
+package ejercicios1_1Directorios;
+
+import java.nio.file.*;
+import java.io.IOException;
+import java.util.stream.Stream;
+
+public class Ejercicio2 {
+    /*
+    Crea un directorio en el directorio actual,
+    luego crea tres ficheros en dicho directorio donde uno se borre y otro se renombre.
+    Crear también un subdirectorio con un fichero dentro.
+    Después mostrar la ruta absoluta de ambos directorios y sus contenidos.
+     */
+    public void show() {
+        Path newDirectory, file1, file2, file3, file4, subDirectory, file1txt, new3, old3;
+        newDirectory = Paths.get("filesExercise2");
+        try {
+
+            Files.createDirectory(newDirectory);
+            file1 = Paths.get("filesExercise2", "file1.txt"); //Se borra
+            file2 = Paths.get("filesExercise2", "file2.txt");
+            file3 = Paths.get("filesExercise2", "file3.txt"); // Se cambia de nombre
+            Files.createFile(file1);
+            Files.createFile(file2);
+            Files.createFile(file3);
+
+
+            subDirectory = newDirectory.resolve("filesExercise2_1");
+            Files.createDirectories(subDirectory);
+            file4 = subDirectory.resolve(Paths.get("subFile.txt"));
+            Files.createFile(file4);
+            //Borrar un archivo
+            file1txt = newDirectory.resolve("file1.txt");
+            Files.deleteIfExists(file1txt);
+            System.out.printf("El archivo '%s' ha sido eliminado correctamente\n", file1txt);
+            // Renombrar
+            old3 = newDirectory.resolve("file3.txt");
+            new3 = newDirectory.resolve("I'mJustAMan.txt");
+            Files.move(old3, new3);
+            System.out.printf("El archivo '%s' ha sido movido correctamente a '%s'\n", old3, new3);
+            /*
+                Files.delete(file2);
+                Files.delete(file4);
+                Files.delete(new3);
+                Files.delete(newDirectory);
+                Files.delete(subDirectory);
+            */
+            try (Stream<Path> directoryContents = Files.walk(newDirectory)) {
+                directoryContents.forEach(c -> {
+                    System.out.printf("%s\n", c.toAbsolutePath());
+                });
+            } catch (IOException e) {
+                System.err.printf("I/O error: %s", e.getMessage());
+            }
+
+
+        } catch (FileAlreadyExistsException e) {
+            System.err.printf("El fichero ya existe: %s", e.getMessage());
+        } catch (NoSuchFileException e) {
+            System.err.printf("El fichero no existe: %s", e.getMessage());
+        } catch (NotDirectoryException e) {
+            System.err.printf("El directorio no existe: %s", e.getMessage());
+        } catch (IOException e) {
+            System.err.printf("Error al mostrar el contenido del directorio: %s", e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+
+        new Ejercicio2().show();
+    }
+}
+
+Archivo: Ejercicio5.java
+package ejercicios1_1Directorios;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NotDirectoryException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.stream.Stream;
+
+public class Ejercicio5 {
+    /*
+    Borra un directorio que contenga ficheros y subdirectorios (que también contengan ficheros y subdirectorios).
+     */
+    public void show() {
+        Path directory = Paths.get("filesExercise2");
+        try (Stream<Path> contents = Files.walk(directory)) {
+            contents.sorted(Comparator.reverseOrder()) //Se pone en orden inverso
+                    .forEach(p -> { // Se van borrando uno a uno 
+                        try {
+                            Files.delete(p);
+                        } catch (IOException e) {
+                            System.err.printf("Error al borrar: %n\n", e.getMessage());
+                        }
+                    });
+        } catch (IOException e) {
+            System.err.printf("Error de Entrada/Salida: %s\n", e.getMessage());
+        }
+
+    }
+
+    public static void main(String[] args) {
+
+        new Ejercicio4().show();
+    }
+}
+
+Archivo: Ejercicio4.java
+package ejercicios1_1Directorios;
+
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+public class Ejercicio4 {
+    /*
+    Muestra todos los archivos con extensión .java que se encuentren en un directorio y sus subdirectorios.
+    */
+    public void show() {
+        Path directory = Paths.get(".");
+
+
+        try (Stream<Path> directoryContents = Files.walk(directory)) {
+            directoryContents.filter(p -> !Files.isDirectory(p)) // Si es un directorio
+                    .filter(c -> c.toString().endsWith(".java")) //Para comprobar que terminan en .java
+                    .forEach(System.out::println);
+
+        } catch (NotDirectoryException e) {
+            System.err.printf("El directorio no existe: %s", e.getMessage());
+        } catch (IOException e) {
+            System.err.printf("Error al mostrar el contenido del directorio: %s", e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+
+        new Ejercicio4().show();
+    }
+}
+
+Archivo: Ejercicio1.java
+package ejercicios1_1Directorios;
+
+import java.nio.file.*;
+import java.io.IOException;
+
+public class Ejercicio1 {
+    public void show() {
+    /*
+    Dado un fichero que se encuentre en una subcarpeta de tu directorio actual,
+    muestra su nombre, si es un ejecutable, si está oculto, la ruta relativa,
+    la ruta absoluta y el tamaño.
+     */
+        Path file, absolutePath;
+        try {
+            file = Paths.get("files", "ejercicio1.txt");
+
+            System.out.println("Nombre del archivo:");
+            System.out.println(file.getFileName());
+
+            System.out.printf("¿Es ejecutable? %s\n", Files.isExecutable(file) ? "Si" : "No");
+
+            System.out.printf("¿Esta oculto? %s\n", Files.isHidden(file) ? "Si" : "No");
+
+            System.out.println("Ruta relativa:");
+            System.out.println(file);
+
+            System.out.println("Ruta absoluta:");
+            absolutePath = file.toAbsolutePath();
+            System.out.println(absolutePath);
+
+            System.out.printf("Tamaño del fichero: %d bytes\n", Files.size(file));
+
+
+        } catch (FileAlreadyExistsException e) {
+            System.err.printf("El fichero ya existe: %s", e.getMessage());
+        } catch (NoSuchFileException e) {
+            System.err.printf("El fichero no existe: %s", e.getMessage());
+        } catch (IOException e) {
+            System.err.printf("Error de entrada/salida: %s", e.getMessage());
+        }
+
+
+    }
+
+    public static void main(String[] args) {
+
+        new Ejercicio1().show();
+    }
+
+}
+
+Archivo: Ejercicio3.java
+package ejercicios1_2FicherosDeTexto;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+public class Ejercicio3 {
+    /*
+    Realiza este ejercicio utilizando las clases BufferedReader y BufferedWriter: concatena todos tus ficheros .java realizados hasta ahora en los ejercicios en uno solo utilizando código de programación. A continuación, lee dicho fichero y genera dos ficheros:
+
+    Fichero donde estén las declaraciones realizadas en los paréntesis del try-with-resources, cada una en una línea y terminadas con ;. Ejemplo:
+
+
+    Stream<Path> directoryContents;
+    BufferedReader reader;
+    BufferedWriter writer;
+    Fichero donde estén las declaraciones de las distintas excepciones tratadas, cada una en una línea, terminadas con ; y sin repeticiones, es decir, la excepción que aparezca varias veces que solamente aparezca una vez en el fichero:
+
+
+    FileNotFoundException e;
+    IOException e;
+    FileAlreadyExistsException e;
+    NoSuchFileException e;
+    NotDirectoryException e;
+
+     */
+    public void show() {
+        Path dir = Paths.get(".");
+        Path newFile = Paths.get("outPut.txt");
+        Path decTry = Paths.get("tryWithResources.txt");
+        Path decExc = Paths.get("exepciones.txt");
+        Set<String> excepciones = new HashSet<>();
+        Pattern patDec = Pattern.compile("([A-Za-z0-9_<>]+(?:<[A-Za-z0-9_<>]+>)?\\s+[A-Za-z0-9_]+)\\s*=");
+        Pattern patCach = Pattern.compile("catch\\s*\\(([^)]+)\\)"); // catch (FileNotFoundException e) -> captura "FileNotFoundException e"
+        Matcher matcher;
+
+        boolean enTry = false;
+
+        try (BufferedWriter bw = Files.newBufferedWriter(newFile)) {
+            try (Stream<Path> content = Files.walk(dir)) {
+                content.filter(p -> !Files.isDirectory(p) && p.toString().endsWith(".java"))
+                        .forEach(archivo -> {
+                                    try (BufferedReader br = Files.newBufferedReader(archivo)) {
+
+                                        String line;
+                                        bw.write("Archivo: " + archivo.getFileName().toString());
+                                        bw.newLine();
+
+                                        while ((line = br.readLine()) != null) {
+                                            bw.write(line);
+                                            bw.newLine();
+                                        }
+                                        bw.newLine();
+
+                                    } catch (IOException e) {
+                                        System.err.printf("Error leyendo el archivo: %s...\n%s", archivo.getFileName(), e.getMessage());
+                                    }
+                                }
+                        );
+                System.out.println("Fichero concatenado con exito");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Fase 2: try-with-resources");
+        try (BufferedReader br = Files.newBufferedReader(newFile);
+             BufferedWriter bw = Files.newBufferedWriter(decTry)) {
+            String line, lineTrim, clear;
+            while ((line = br.readLine()) != null) {
+                lineTrim = line.trim();
+                if (lineTrim.contains("try") && lineTrim.contains("(")) {
+                    enTry = true;
+                }
+                if (enTry) {
+                    matcher = patDec.matcher(lineTrim);
+                    while ((matcher.find())) {
+                        clear = matcher.group(1).trim();
+                        bw.write(clear + ";");
+                        bw.newLine();
+                    }
+                    if (lineTrim.contains(")")) {
+                        enTry = false;
+                    }
+                }
+
+            }
+            System.out.println("Fichero de declaraciones creado con exito!");
+        } catch (IOException e) {
+            System.err.printf("Error en la fase 2: %s", e.getMessage());
+        }
+        System.out.println("Fase 3, Excepciones");
+        try (BufferedReader br = Files.newBufferedReader(newFile)) {
+            String line, ctch, excClear;
+            String[] part;
+            int latSpace;
+            while ((line = br.readLine()) != null) {
+                matcher = patCach.matcher(line);
+                while (matcher.find()) {
+                    ctch = matcher.group(1).trim();
+                    part = ctch.split("\\|");
+                    for (String p : part) {
+                        //Separo el nombre de la excepcion del nombre de la variable 'e', ya que generalmente estan separados por espacio
+                        latSpace = p.lastIndexOf(' ');
+                        excClear = (latSpace != -1) ? p.substring(0, latSpace).trim() : p;
+
+                        if (!excClear.isEmpty()) {
+                            excepciones.add(excClear + " e;"); //Para evitar duplicados
+                        }
+                    }
+
+                }
+            }
+        } catch (IOException e) {
+            System.err.printf("Error leyendo para las excepciones : %s", e.getMessage());
+        }
+        //Escribo el conjunto de excepciones únicas
+        try (BufferedWriter bw = Files.newBufferedWriter(decExc)) {
+            for (String e : excepciones) {
+                bw.write(e);
+                bw.newLine();
+            }
+            System.out.println("Fichero de excepciones creado con exito!");
+        } catch (IOException e) {
+            System.err.printf("Error escribiendo el fichero : %s", e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        new Ejercicio3().show();
+    }
+}
+
+Archivo: Ejercicio2.java
+package ejercicios1_2FicherosDeTexto;
+
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
+public class Ejercicio2 {
+    /*
+    Realiza un programa para encriptar y desencriptar los datos de un fichero de texto.
+     Se introduce una cadena por teclado que será la clave a aplicar para la encriptación y desencriptación.
+     A cada carácter del fichero de texto original se le sumará una letra de la clave (el código Unicode),
+     cuando se hayan acabado las letras de la palabra clave y aún no se hayan acabado los caracteres del fichero,
+      se volverá al principio de la cadena para seguir aplicando la encriptación.
+      Los datos encriptados se escribirán en un fichero destino, que será usado como origen para desencriptar.
+      Para desencriptar se aplicará la fórmula a la inversa. Por ejemplo, si el fichero origen contiene “abcdef”
+      y la palabra clave es “rosa”, en el fichero destino se escribirán los siguientes caracteres: ”ÓÑÖÅ×Õ”.
+      Es decir, Ó es el resultado de sumar a y r, Ñ es el resultado de sumar b y o, y así sucesivamente.
+     */
+    public void show() {
+        Scanner kb = new Scanner(System.in);
+        int choice, caracterLeido, caracterEncriptado, caracterDesencriptado;
+        int i = 0; //Contador
+        Path dir = Paths.get("file3");
+        Path source = Paths.get("file3", "source.txt");
+        Path destination = dir.resolve("destination.txt");
+        Path desencriptado = dir.resolve("desencriptado.txt");
+        System.out.println("¿Quieres encriptar, desencriptar? (1/2/)");
+        String password;
+        char letraClave;
+        do {
+            choice = kb.nextInt();
+            kb.nextLine();
+            if (choice != 1 && choice != 2) {
+                System.out.println("Opción incorrecta, debes introducir entre 1 y 2");
+            }
+        } while (choice != 1 && choice != 2);
+
+        do {
+            System.out.println("Escribe una clave de encriptación");
+            password = kb.nextLine();
+        } while (password.isEmpty());
+
+        if (choice == 1) {
+            System.out.println("Encriptando archivo...");
+            try (BufferedReader br = Files.newBufferedReader(source);
+                 BufferedWriter bw = Files.newBufferedWriter(destination)) {
+                while ((caracterLeido = br.read()) != -1) {
+                    letraClave = password.charAt(i % password.length());
+                    caracterEncriptado = caracterLeido + letraClave;
+                    bw.write((char) caracterEncriptado);
+                    i++;
+
+                }
+            } catch (Exception e) {
+                System.out.printf("Error: %s", e.getMessage());
+            }
+        } else if (choice == 2) {
+            System.out.println("Desencriptando archivo...");
+            i = 0;
+            try (BufferedReader br = Files.newBufferedReader(destination);
+                 BufferedWriter bw = Files.newBufferedWriter(desencriptado)) {
+                while ((caracterLeido = br.read()) != -1) {
+                    letraClave = password.charAt(i % password.length());
+
+                    caracterDesencriptado = caracterLeido - letraClave;
+
+                    bw.write((char) caracterDesencriptado);
+                    i++;
+                }
+                System.out.println("El archivo ha sido desencriptado correctamente");
+            } catch (Exception e) {
+                System.out.printf("Error: %s", e.getMessage());
+            }
+        }
+
+
+    }
+
+    public static void main(String[] args) {
+        new Ejercicio2().show();
+    }
+}
+
+Archivo: Ejercicio4.java
+package ejercicios1_2FicherosDeTexto;
+
+public class Ejercicio4 {
+}
+
+Archivo: Ejercicio1.java
+package ejercicios1_2FicherosDeTexto;
+
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.List;
+
+public class Ejercicio1 {
+    /*
+    Crea un método con 3 parámetros:
+
+Path source
+
+Path destination
+
+boolean appended
+
+En dicho método, haz lo siguiente:
+
+Si el destino es un directorio:
+
+Si el origen también es un directorio: lanza la excepción IllegalArgumentException.
+
+Si el origen es un fichero: crea un fichero en el directorio destino que sea una copia del fichero origen. Utiliza el método copy de la clase Files. Muestra por consola el contenido del fichero destino.
+
+Si el destino es un fichero:
+
+Si el origen es un directorio: lanza la excepción IllegalArgumentException.
+
+Si el origen es un fichero, haz diferentes cosas en función del booleano appended:
+
+Si el destino no existe: se crea y se copia el fichero origen cadena a cadena. Utiliza el método writeString de Files. Muestra por consola el fichero destino.
+
+Si el destino existe y appended es false: se sobrescribe su contenido y se copia el fichero origen con todo el contenido en una única operación. Utiliza el método write de Files. Muestra por consola el fichero destino.
+
+Si el destino existe y appended es true: no se sobrescribe sino que se mantiene el contenido del fichero destino y se le añade el contenido del fichero origen. Muestra por consola el fichero destino.
+     */
+
+    public void show() {
+        try {
+            Path dir = Paths.get("files2");
+            Path sourceFile = dir.resolve("source.txt");
+            Path destFile = dir.resolve("destiny.txt");
+            Path subDir = dir.resolve("subDirectory");
+            if (!Files.exists(dir)) {
+                Files.createDirectory(dir);
+            }
+            if (!Files.exists(subDir)) {
+                Files.createDirectory(subDir);
+            }
+            Files.writeString(sourceFile, "Hola línea 1, espero que vayamos aprendiendo juntos\n Hola Línea 2, pq estas encima mío");
+            System.out.println("Prueba 1");
+            copyWriteFiles(sourceFile, subDir, false); //Copiar fichero a directorio
+
+            System.out.println("Prueba 2");
+            Files.deleteIfExists(destFile);
+            copyWriteFiles(sourceFile, destFile, false); // Destino no existe
+            System.out.println("Prueba 3");
+            copyWriteFiles(sourceFile, destFile, false); //Destino existe con append = false (Sobrescribir)
+            System.out.println("Prueba 4");
+            copyWriteFiles(sourceFile, destFile, true); //Desitno existe con append = true (Añadir al final)
+
+            try {
+                System.out.println("Prueba 5");
+                copyWriteFiles(subDir, destFile, false);
+            } catch (IllegalArgumentException e) {
+                System.err.printf("Error : %s", e.getMessage());
+            }
+        } catch (IOException e) {
+            System.err.printf("Erro durante la ejecución: %s", e.getMessage());
+        }
+
+    }
+
+    public void copyWriteFiles(Path source, Path destination, boolean appended) {
+        try {
+            if (Files.isDirectory(destination)) {
+                if (Files.isDirectory(source)) {
+                    throw new IllegalArgumentException("El origen no puede ser un directorio si el destino lo es.");
+                } else {
+
+                    Path newDirectory = destination.resolve(source.getFileName());
+                    Files.copy(source, newDirectory, StandardCopyOption.REPLACE_EXISTING);
+                    System.out.println(Files.readString(newDirectory));
+                }
+            } else {
+                if (Files.isDirectory(source)) {
+                    throw new IllegalArgumentException("El origen no puede ser un directorio si el destino es un fichero.");
+                }
+                if (!Files.exists(destination)) {
+
+
+                    for (String linea : Files.readAllLines(source)) {
+                        Files.writeString(
+                                destination,
+                                linea + System.lineSeparator(),
+                                StandardOpenOption.CREATE,
+                                StandardOpenOption.APPEND
+                        );
+                    }
+
+                    System.out.println(Files.readString(destination));
+                } else {
+
+
+                    if (!appended) {
+
+                        byte[] contenido = Files.readAllBytes(source);
+
+                        Files.write(destination, contenido);
+
+                        System.out.println(Files.readString(destination));
+                    } else {
+
+                        String contenido = Files.readString(source);
+
+                        Files.writeString(
+                                destination,
+                                contenido,
+                                StandardOpenOption.APPEND
+                        );
+
+                        System.out.println(Files.readString(destination));
+                    }
+
+                }
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            System.err.printf("Error de E/S durante la operación con ficheros: %s", e.getMessage());
+        }
+
+    }
+
+    public static void main(String[] args) {
+
+        new Ejercicio1().show();
+    }
+}
+

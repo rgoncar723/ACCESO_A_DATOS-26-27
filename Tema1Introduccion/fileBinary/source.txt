@@ -1,0 +1,39 @@
+Nombre del contacto: Sara Rojas
+Teléfono: 666777111
+Dirección: Clle Thai 23 Piso 2
+Código postal (número entero): 11002
+Fecha de nacimiento: 9-7-2005
+Si le debo dinero (booleano): false
+Cuánto le debo(número decimal): 0.0
+
+Nombre del contacto: Santiago Ragel
+Teléfono: 666773121
+Dirección: Clle Yu 12 Portal 5G
+Código postal (número entero): 11302
+Fecha de nacimiento: 23-10-2007
+Si le debo dinero (booleano): false
+Cuánto le debo(número decimal): 0.0
+
+Nombre del contacto: Nuria Carrillo
+Teléfono: 661273121
+Dirección: Clle Sevilla 89 Piso 6B
+Código postal (número entero): 11363
+Fecha de nacimiento: 10-7-1975
+Si le debo dinero (booleano): true
+Cuánto le debo(número decimal): 134.65
+
+Nombre del contacto: Eva Macías
+Teléfono: 611273121
+Dirección: Clle San Felipe 20 Piso 8A
+Código postal (número entero): 10063
+Fecha de nacimiento: 3-2-1990
+Si le debo dinero (booleano): true
+Cuánto le debo(número decimal): 500.65
+
+Nombre del contacto: Jaime González
+Teléfono: 6660023121
+Dirección: Clle Sevilla 89 Piso 6B
+Código postal (número entero): 11363
+Fecha de nacimiento: 29-05-2009
+Si le debo dinero (booleano): false
+Cuánto le debo(número decimal): 0.0
